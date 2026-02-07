@@ -66,3 +66,19 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+.game.blur {
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+  z-index: 100;
+}
