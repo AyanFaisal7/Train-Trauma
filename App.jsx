@@ -1,53 +1,101 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 
-let arr = [2, 1, 0, 1, 1, 0, 0, 0, 1]
+let arr = [1, 0, 1, 1, 0, 0, 0, 1]
 
 
 function Game() {
   let [count, setCount] = useState(0)
   let [gasMask, setGasMask] = useState(5)
   let [isDisabled, setIsDisabled] = useState(false);
-  let [stopBtn , setStopBtn] = useState(0)
+  let [stopBtn, setStopBtn] = useState(0)
+  let [gasMaskUsed, setGasMaskUsed] = useState(false)
+  let [enteredCompartment, setEnteredCompartment] = useState(0)
+  let [phase, setPhase] = useState("playing")
+  const [countdown, setCountdown] = useState(3);
+  const [countdownGas, setCountdownGas] = useState(0);
+
+  // console.log(enteredCompartment)
 
   useEffect(() => {
-  if (gasMask < 0) {
-    setIsDisabled(true);
-  }
-}, [gasMask])
+    if (gasMask < 0) {
+      setIsDisabled(true);
+    }
+  }, [gasMask])
+
+  useEffect(() => {
+    if (phase !== "countdown") return;
+
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev === 1) {
+          clearInterval(timer);
+          setPhase("result");
+          alert(countdownGas === 1 ? "poison" : "normal");
+          return 3;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [phase]);
 
   // console.log(arr.length)
-  count = arr[count]
+  const gasType = arr[count]
+  // console.log(gasType)
   return (
     <>
       <div>
-        {/* TRAIN COMPARTMENTS */}
-{stopBtn >= 1 ? <h1>Compartment {stopBtn}</h1> : null}
-{stopBtn < 8 ? <button
-          onClick={() => {
-            setIsDisabled(gasMask > 0 ? false : true);
-            setStopBtn(prev => prev + 1)
-            console.log(stopBtn)
-            setCount(count++)
-            alert(count === 1 ? "poison" : "normal");
-          }}
-          disabled = {stopBtn === 8}
-        >move to compartment {stopBtn + 1}</button> : <button
-         disabled = {stopBtn === 8} >end of game</button>}
-        
+        <div className={`game ${phase === "countdown" ? "blur" : ""}`}>
+          {/* normal game UI here */}
+          {/* TRAIN COMPARTMENTS */}
+          {stopBtn >= 1 ? <h1>Compartment {stopBtn}</h1> : null}
+          {stopBtn < 8 ? <button
+            onClick={() => {
+              const currentGas = arr[count];
+              setIsDisabled(gasMask > 0 ? false : true);
+              setStopBtn(prev => prev + 1)
+              // console.log(stopBtn)
+              setCount(prev => prev + 1)
+              setGasMaskUsed(false)
+              setEnteredCompartment(prev => prev + 1)
+              setPhase("countdown")
+              console.log(
+                gasType === 1 && gasMaskUsed
+                  ? "bachaw ap safe ho"
+                  : gasType === 0
+                    ? "bachaw ap safe ho cuz normal gas"
+                    : "bachaw apki fielding set hai"
+              );
+              // console.log(
+              //  gasType === 1 && !gasMaskUsed ? "bachaw u lost" : null
+              // ) (losing condition)
+                setCountdownGas(currentGas); 
+            }}
+            disabled={stopBtn === 8}
+          >move to compartment {stopBtn + 1}</button> : <button
+            disabled={stopBtn === 8} >end of game</button>}
 
-        {/* USER */}
-        <p>you have {gasMask} gas masks left . If u want to use the gas mask for the next compartment pls click the button below</p>
 
-        <button
-          onClick={() => {
-            setIsDisabled(true)
-             if (gasMask === 0) return;
-            setGasMask(prev => prev - 1)
-          }}
-          disabled={isDisabled}
-        >use gas mask</button>
-        {console.log(gasMask)}
+          {/* USER */}
+          <p>you have {gasMask} gas masks left . If u want to use the gas mask for the next compartment pls click the button below</p>
+
+          <button
+            onClick={() => {
+              setIsDisabled(true)
+              if (gasMask === 0) return;
+              setGasMask(prev => prev - 1)
+              setGasMaskUsed(true)
+            }}
+            disabled={isDisabled}
+          >use gas mask</button>
+          {/* {console.log(gasMask)} */}
+        </div>
+        {phase === "countdown" && (
+          <div className="overlay">
+            <h1>Gas is releasing in {countdown}</h1>
+          </div>)}
       </div>
     </>
   )
